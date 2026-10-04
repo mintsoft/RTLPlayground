@@ -52,7 +52,7 @@ jobs:
           message: |
             ## Image Growth
 
-            Commit: ${{ github.sha }}
+            Commit: ${{ github.sha }} 
 
             | Bank # | Main | Branch |
             | --- | --- | --- |
