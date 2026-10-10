@@ -27,8 +27,9 @@ endif
 ifeq ($(CI),1)
 	CC_FLAGS += --Werror
 endif
-
-BUILDDIR = output/$(MACHINE)
+ifndef BUILDDIR
+	BUILDDIR = output/$(MACHINE)
+endif
 VERSION_HEADER := version.h
 
 GIT_VERSION := $(shell git rev-parse --short HEAD)
@@ -52,6 +53,9 @@ BUILD_DATE := $(shell date -u -d @$(SOURCE_DATE_EPOCH) +"%Y-%m-%d %H:%M:%S" 2>/d
 endif
 
 all: create_build_dir $(VERSION_HEADER) $(SUBDIRS) $(BUILDDIR)/rtlplayground-$(FILENAME_EXTENSION).bin
+
+bank_size:
+	tools/bank_occupancy.sh "$(MACHINE)"
 
 create_build_dir:
 	mkdir -p "$(BUILDDIR)"
