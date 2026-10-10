@@ -27,8 +27,9 @@ endif
 ifeq ($(CI),1)
 	CC_FLAGS += --Werror
 endif
-
-BUILDDIR = output/$(MACHINE)
+ifndef BUILDDIR
+	BUILDDIR = output/$(MACHINE)
+endif
 VERSION_HEADER := version.h
 
 GIT_VERSION := $(shell git rev-parse --short HEAD)
