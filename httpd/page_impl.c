@@ -197,6 +197,23 @@ void sfr_data_to_html(void)
 	}
 }
 
+void sfr_data_to_json_array(void)
+{
+	uint8_t val = 0;
+	char_to_html('[');
+
+    for (uint8_t byte = 0; byte < 4; byte++) {
+        for (int8_t bit = 7; bit >= 0; bit--) {
+            uint8_t val = (sfr_data[byte] >> bit) & 1;
+
+            char_to_html(val ? '1' : '0');
+        }
+		if (byte != 3)
+			char_to_html(',');
+    }
+
+    char_to_html(']');
+}
 
 void reg_to_html(uint16_t reg)
 {
@@ -329,8 +346,10 @@ void send_vlan(uint16_t vlan)
 	dbg_string("sending VLAN\n");
 	//{"members":"0x00060011"}
 	slen += strtox(outbuf + slen, "{\"members\":\"0x");
+	
 	vlan_get(vlan);
 	sfr_data_to_html();
+
 	slen += strtox(outbuf + slen, "\",\"name\":\"");
 	__xdata uint16_t n = vlan_name(vlan);
 	if (n== 0xffff) {
