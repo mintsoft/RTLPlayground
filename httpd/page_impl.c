@@ -199,19 +199,16 @@ void sfr_data_to_html(void)
 
 void sfr_data_to_json_array(void)
 {
-	uint8_t val = 0;
-	char_to_html('[');
+    char_to_html('[');
 
-    for (uint8_t byte = 0; byte < 4; byte++) {
-        for (int8_t bit = 7; bit >= 0; bit--) {
-            uint8_t val = (sfr_data[byte] >> bit) & 1;
-
-            char_to_html(val ? '1' : '0');
+    for (uint8_t i = 0; i < 4; i++) {
+        uint8_t val = sfr_data[i];
+        for (uint8_t bit = 0; bit < 8; bit++) {
+            if (i != 0 || bit != 0)
+                char_to_html(',');
+            char_to_html((val & (1u << (7 - bit))) ? '1' : '0');
         }
-		if (byte != 3)
-			char_to_html(',');
     }
-
     char_to_html(']');
 }
 
@@ -339,18 +336,52 @@ void send_basic_info(void)
 	char_to_html('}');
 }
 
+void sfr_data_to_vlan_json(void)
+{
+	//inverse of vlan_create
+    uint16_t a = ((uint16_t)(sfr_data[1] & 0x0f) << 6) | ((uint16_t)sfr_data[2] >> 2);
+    uint16_t members = ((uint16_t)(sfr_data[2] & 0x03) << 8) | sfr_data[3];
+    uint16_t untagged;
+    uint16_t tagged;
+
+    members &= 0x03ff;
+    untagged = (a & members) & 0x03ff;
+    tagged = members & (uint16_t)~untagged;
+
+	slen += strtox(outbuf + slen, "{\"tagged\":[");
+    
+    uint8_t first = 1;
+    for (uint8_t port = 0; port < 10; port++) {
+        if (tagged & (1u << port)) {
+            if (!first) 
+				char_to_html(',');
+            json_char_to_html('0' + machine.log_to_phys_port[port]);
+            first = 0;
+        }
+    }
+	slen += strtox(outbuf + slen, "],\"untagged\":[");
+
+    first = 1;
+    for (uint8_t port = 0; port < 10; port++) {
+        if (untagged & (1u << port)) {
+            if (!first)
+				char_to_html(',');
+            json_char_to_html('0' + machine.log_to_phys_port[port]);
+            first = 0;
+        }
+    }
+	slen += strtox(outbuf + slen, "]");
+}
 
 void send_vlan(uint16_t vlan)
 {
 	slen = strtox(outbuf, HTTP_RESPONCE_JSON);
 	dbg_string("sending VLAN\n");
-	//{"members":"0x00060011"}
-	slen += strtox(outbuf + slen, "{\"members\":\"0x");
-	
-	vlan_get(vlan);
-	sfr_data_to_html();
 
-	slen += strtox(outbuf + slen, "\",\"name\":\"");
+	vlan_get(vlan);
+	sfr_data_to_vlan_json();
+
+	slen += strtox(outbuf + slen, ",\"name\":\"");
 	__xdata uint16_t n = vlan_name(vlan);
 	if (n== 0xffff) {
 		dbg_string("VLAN has no name\n");
@@ -358,15 +389,17 @@ void send_vlan(uint16_t vlan)
 		while(vlan_names[n] && vlan_names[n] != ' ')
 			json_char_to_html(vlan_names[n++]);
 	}
-	slen += strtox(outbuf + slen, "\",\"pvid\":\"0x");
-	uint16_t pvid_mask = 0;
+	slen += strtox(outbuf + slen, "\",\"pvid\":[");
+	uint8_t first = 1;	
 	for (uint8_t i = machine.min_port; i <= machine.max_port; i++) {
-		if (port_pvid_get(i) == vlan)
-			pvid_mask |= (1 << i);
-}
-	byte_to_html(pvid_mask >> 8);
-	byte_to_html(pvid_mask);
-	slen += strtox(outbuf + slen, "\"}");
+		if(port_pvid_get(i) == vlan) {
+			if(!first)
+				json_char_to_html(',');
+			json_char_to_html('0' + machine.log_to_phys_port[i]);
+			first=0; 
+		}
+	}
+	slen += strtox(outbuf + slen, "]}");
 }
 
 /* Send counters
@@ -611,7 +644,7 @@ void send_lag(void)
 		}
 		slen += strtox(outbuf + slen, "\",\"hash\":\"");
 		reg_read_m(RTL837X_TRK_HASH_CTRL_BASE + (l << 2));
-		sfr_data_to_html();
+		sfr_data_to_json_array();
 		slen += strtox(outbuf + slen, "\"},");
 	}
 	slen -=1; // remove comma
