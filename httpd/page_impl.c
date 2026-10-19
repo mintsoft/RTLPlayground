@@ -336,8 +336,13 @@ void send_basic_info(void)
 	char_to_html('}');
 }
 
-void sfr_data_to_vlan_json(void)
+void send_vlan(uint16_t vlan)
 {
+	slen = strtox(outbuf, HTTP_RESPONCE_JSON);
+	dbg_string("sending VLAN\n");
+
+	vlan_get(vlan);
+
 	//inverse of vlan_create
     uint16_t a = ((uint16_t)(sfr_data[1] & 0x0f) << 6) | ((uint16_t)sfr_data[2] >> 2);
     uint16_t members = ((uint16_t)(sfr_data[2] & 0x03) << 8) | sfr_data[3];
@@ -370,18 +375,8 @@ void sfr_data_to_vlan_json(void)
             first = 0;
         }
     }
-	slen += strtox(outbuf + slen, "]");
-}
+	slen += strtox(outbuf + slen, "],\"name\":\"");
 
-void send_vlan(uint16_t vlan)
-{
-	slen = strtox(outbuf, HTTP_RESPONCE_JSON);
-	dbg_string("sending VLAN\n");
-
-	vlan_get(vlan);
-	sfr_data_to_vlan_json();
-
-	slen += strtox(outbuf + slen, ",\"name\":\"");
 	__xdata uint16_t n = vlan_name(vlan);
 	if (n== 0xffff) {
 		dbg_string("VLAN has no name\n");
@@ -389,8 +384,10 @@ void send_vlan(uint16_t vlan)
 		while(vlan_names[n] && vlan_names[n] != ' ')
 			json_char_to_html(vlan_names[n++]);
 	}
+
 	slen += strtox(outbuf + slen, "\",\"pvid\":[");
-	uint8_t first = 1;	
+	
+	first = 1;	
 	for (uint8_t i = machine.min_port; i <= machine.max_port; i++) {
 		if(port_pvid_get(i) == vlan) {
 			if(!first)
