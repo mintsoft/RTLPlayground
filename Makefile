@@ -128,7 +128,8 @@ SRCS += \
 
 OBJS = ${SRCS:%.c=$(BUILDDIR)/%.rel}
 DEPS := ${SRCS:%.c=$(BUILDDIR)/%.d}
-HTML := $(shell find html -name '*.js' -or -name '*.html' -or -name '*.svg' -or -name '*.css' -or -name '*.ico')
+HTML := $(shell find html -name *.js -or -name '*.html' -or -name '*.svg' -or -name '*.css' -or -name '*.ico')
+HTML_JS := $(shell find html -name '*.js')
 
 # Minified copy of the web UI sources, used as the fileadder input.
 # The raw html/ sources stay untouched for development; the minified
@@ -139,6 +140,8 @@ html_min: $(HTML)
 	rm -rf $(HTML_MIN)
 	mkdir -p $(HTML_MIN)
 	@for f in $(HTML); do python3 tools/minify.py $$f $(HTML_MIN)/$$(basename $$f) || exit 1; done
+	@for f in $(HTML_JS); do cat $$f | python3 tools/rjsmin.py > $(HTML_MIN)/$$(basename $$f) || exit 1; done
+
 
 html_data.c html_data.h &: $(HTML) | tools html_min
 	tools/output/fileadder -a $(HTML_LOCATION) -s $(IMAGESIZE) -b BANK1 -z -d $(HTML_MIN) -p html_data
