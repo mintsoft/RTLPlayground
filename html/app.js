@@ -746,6 +746,17 @@ function h(tag,attrs,kids){
   if(kids)kids.forEach(function(c){e.appendChild(c)});
   return e;
 }
+function tt(s,c){
+  for (el in $(s)) {
+    const rect = el.getBoundingClientRect(),
+    show = function(){h("div",{"class":"tt","id":"tt_div","style":"left: "+((rect.left+rect.width)/2)+"px;top:"+(rect.top-8)+"px"},c)},
+    hide = function(){$("tt_div").remove()};
+    el.addEventListener("mouseenter",show)
+    el.addEventListener("focus",show)
+    el.addEventListener("mouseleave",hide)
+    el.addEventListener("blur",hide)
+  }
+}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function badge(txt,cls){return'<span class="badge'+(cls?" "+cls:"")+'">'+esc(txt)+"</span>"}
 function linkBadge(p){
