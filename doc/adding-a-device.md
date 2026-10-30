@@ -12,7 +12,7 @@ make MACHINE=<NAME>
 
 ## Whitespace testing
 
-This is a link [to a file that has a space in the name|rob test file.md] and this it the prose afterwards.
+This is a link [to a file that has a space in the name](rob test file.md) and this it the prose afterwards.
 
 ## What a new device consists of
 
