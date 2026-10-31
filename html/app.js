@@ -2704,7 +2704,7 @@ function updateStrip() {
         el.classList.toggle("dis", !p.enabled);
         var up = p.enabled && p.link != "DOWN";
         el.classList.toggle("up", !!up);
-        if (up) el.style.setProperty("--pc", "var(" + "--s" + p.link.replace("2.5G","2G5").toLowerCase() + ")");
+        if (up) el.style.setProperty("--pc", "var(" + "--s" + p.link.replace(/\-[HF]D$/,"").replace("2.5G","2G5").toLowerCase() + ")");
         lb.textContent = !p.enabled ? t("c_off") : (p.link != "DOWN" ? p.link : t("c_down"));
         el.title = portRows(p).map(function(r) {
             return r[0] + ": " + r[1]
@@ -2783,12 +2783,7 @@ function portRows(p) {
             rows.push([t("p_rxlos"), v]);
         }
     } else if (p.adv) {
-        var bits = parseInt(p.adv, 2),
-            names = ["10M " + t("c_half"), "10M " + t("c_full"), "100M " + t("c_half"), "100M " + t("c_full"), "1G", "2.5G"];
-        var on = names.filter(function(_, b) {
-            return bits & (1 << b)
-        });
-        rows.push([t("p_adv"), on.join(", ") || "-"]);
+        rows.push([t("p_adv"), p.adv.join(", ").replace("-HD"," " + t("c_half")).replace("-FD"," " + t("c_full")) || "-"]);
     }
     return rows;
 }

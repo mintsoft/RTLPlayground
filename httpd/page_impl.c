@@ -914,28 +914,53 @@ void send_status(void)
 				bool_to_html(0);
 			}
 		} else {
+			needComma = false;
 			slen += strtox(outbuf + slen, ",\"isSFP\":0,\"enabled\":");
 			phy_read(i, PHY_MMD31, 0xa610);
 			bool_to_html(SFR_DATA_8 == 0x20);
-			slen += strtox(outbuf + slen, ",\"adv\":{\"2.5G\":");
+			slen += strtox(outbuf + slen, ",\"adv\":[");
+
 			phy_read(i, PHY_MMD_AN, PHY_ANEG_MGBASE_CTRL);
 			uint16_t w = SFR_DATA_U16;
-			bool_to_html(!!(w & 0x80));		// 2500BaseN-Full
+			if(!!(w & 0x80)) { // 2500BaseN-Full
+				slen += strtox(outbuf + slen, "\"2.5G\"");
+				needComma = true;
+			}
+
 			phy_read(i, PHY_MMD31, PHY_MMD31_GBCR);
 			w = SFR_DATA_U16;
-			slen += strtox(outbuf + slen, ",\"1G\":");
-			bool_to_html(!!(w & 0x0200));		// 1000Base-Full
+			if(!!(w & 0x0200)) { // 1000Base-Full
+				if(needComma)
+					char_to_html(",");
+				slen += strtox(outbuf + slen, "\"1G\"");
+			}
+
 			phy_read(i, PHY_MMD_AN, PHY_ANEG_ADV);
 			w = SFR_DATA_U16;
-			slen += strtox(outbuf + slen, ",\"100M-FD\":");
-			bool_to_html(!!(w & 0x0100));		// 100Base-Full
-			slen += strtox(outbuf + slen, ",\"100M-HD\":");
-			bool_to_html(!!(w & 0x80));		// 100Base-Half
-			slen += strtox(outbuf + slen, ",\"10M-HD\":");
-			bool_to_html(!!(w & 0x40));		// 10Base-Full
-			slen += strtox(outbuf + slen, ",\"10M-FD\":");
-			bool_to_html(!!(w & 0x20));		// 10Base-Half
-			char_to_html('}"');
+			if(!!(w & 0x0100)){ // 100Base-Full
+				if(needComma)
+					char_to_html(",");
+				slen += strtox(outbuf + slen, "\"100M-FD\"");
+			}
+
+			if(!!(w & 0x80)) { // 100Base-Half
+				if(needComma)
+					char_to_html(",");
+				slen += strtox(outbuf + slen, "\"100M-HD\"");
+			}
+
+			if(!!(w & 0x40)) { // 10Base-Full
+				if(needComma)
+					char_to_html(",");
+				slen += strtox(outbuf + slen, "\"10M-HD\"");
+			}
+
+			if(!!(w & 0x20)) { // 10Base-Half
+				if(needComma)
+					char_to_html(",");
+				slen += strtox(outbuf + slen, "\"10M-FD\"");
+			}
+			char_to_html(']"');
 		}
 
 		slen += strtox(outbuf + slen, ",\"link\":\"");
