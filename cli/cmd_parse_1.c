@@ -3,6 +3,8 @@
 #include "cmd_parse_2_debug.h"
 #include "cmd_parse_2_feature.h"
 #include "cmd_parse_2_show.h"
+#include "cmd_parse_2_remove.h"
+#include "cmd_parse_2_system.h"
 
 #pragma codeseg BANK2
 #pragma constseg BANK2
@@ -1865,10 +1867,22 @@ void cmd_parse_help(void) {
 	cmd_error("Sorry, there is no help at the moment.\n");
 }
 void cmd_parse_port(void) {
+	if (cmd_words_len < 2)
+		return;
 
 }
 void cmd_parse_remove(void) {
-
+	if (cmd_words_len < 2)
+		return;
+	if (cmd_compare(1, "port-isolation")) {
+		cmd_parse_remove_port_isolation();
+	} else if (cmd_compare(1, "vlan")) {
+		cmd_parse_remove_vlan();
+	} else if (cmd_compare(1, "lag")) {
+		cmd_parse_remove_lag();
+	} else if (cmd_compare(1, "port")) {
+		cmd_parse_remove_port();
+	}
 }
 void cmd_parse_show(void) {
 	if (cmd_words_len < 2)
@@ -1899,11 +1913,40 @@ void cmd_parse_show(void) {
 	}
 }
 void cmd_parse_stp(void) {
-
+	if (cmd_words_len < 2)
+		return;
 }
 void cmd_parse_system(void) {
+	if (cmd_words_len < 2)
+		return;
 
+	if (cmd_compare(1, "dns")) {
+		cmd_parse_system_dns();
+	} else if (cmd_compare(1, "dst")) {
+		cmd_parse_system_dst();
+	} else if (cmd_compare(1, "factory-reset")) {
+		cmd_parse_system_factory_reset();
+	} else if (cmd_compare(1, "hostname")) {
+		cmd_parse_system_hostname();
+	} else if (cmd_compare(1, "ip")) {
+		cmd_parse_system_ip();
+	} else if (cmd_compare(1, "mac")) {
+		cmd_parse_system_mac();
+	} else if (cmd_compare(1, "mgmt-vlan")) {
+		cmd_parse_system_mgmt_vlan();
+	} else if (cmd_compare(1, "ntp")) {
+		cmd_parse_system_ntp();
+	} else if (cmd_compare(1, "passwd")) {
+		cmd_parse_system_passwd();
+	} else if (cmd_compare(1, "reboot")) {
+		cmd_parse_system_reboot();
+	} else if (cmd_compare(1, "session-timeout")) {
+		cmd_parse_system_session_timeout();
+	} else if (cmd_compare(1, "syslog")) {
+		cmd_parse_system_syslog();
+	}
 }
 void cmd_parse_vlan(void) {
-
+	if (cmd_words_len < 2)
+		return;
 }
