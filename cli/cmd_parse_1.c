@@ -1949,4 +1949,37 @@ void cmd_parse_system(void) {
 void cmd_parse_vlan(void) {
 	if (cmd_words_len < 2)
 		return;
+
+	vlan_settings.vlan = 0;
+	vlan_settings.members = 0;
+	vlan_settings.tagged = 0;
+
+	if (atoi_short(cmd_words_b[1]) == 0)
+		return;
+
+	vlan_settings.vlan = atoi_results_short;
+
+	if (cmd_words_len > 2) {
+		if (vlan_ptr > (VLAN_NAMES_SIZE - 5)) {
+			print_string("VLAN name table full, name ignored\n");
+		} else {
+			uint8_t pos = cmd_words_b[2];
+			vlan_name_remove(vlan_settings.vlan);
+			__xdata uint8_t *vlan_str = &vlan_names[vlan_ptr];
+			*vlan_str++ = hex[(vlan_settings.vlan >> 8) & 0xf];
+			*vlan_str++ = hex[(vlan_settings.vlan >> 4) & 0xf] ;
+			*vlan_str++ = hex[vlan_settings.vlan & 0xf];
+			while(!cmd_is_space_or_nul(pos)) {
+				uint8_t c = cmd_name_char(cmd_buffer[pos++]);
+				write_char(c);
+				*vlan_str++ = c;
+			}
+			*vlan_str++ = ' ';
+			*vlan_str = NUL;
+			vlan_ptr = vlan_str - vlan_names;
+			print_string("<\n");
+		}
+	}
+
+	vlan_create();
 }
