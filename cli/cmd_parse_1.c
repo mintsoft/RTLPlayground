@@ -6,6 +6,7 @@
 #include "cmd_parse_2_remove.h"
 #include "cmd_parse_2_system.h"
 #include "cmd_parse_2_lag.h"
+#include "cmd_parse_2_port.h"
 
 #pragma codeseg BANK2
 #pragma constseg BANK2
@@ -1875,6 +1876,10 @@ void cmd_parse_port(void) {
 	if (cmd_words_len < 2)
 		return;
 
+	if (cmd_arg_port_separator(cmd_words_b[1]) == 0)
+		return;
+
+	cmd_parse_port_NUMBER();
 }
 void cmd_parse_remove(void) {
 	if (cmd_words_len < 2)
