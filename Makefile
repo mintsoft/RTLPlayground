@@ -253,6 +253,7 @@ SRCS += \
 	cli/cmd_parse_2_system.c \
 	cli/cmd_parse_2_lag.c \
 	cli/cmd_parse_2_port.c \
+	cli/cmd_parse_2_stp.c \
 	cli/cmd_parse_stp.c
 
 # The "health" command exists only with HEALTH=1

@@ -7,6 +7,7 @@
 #include "cmd_parse_2_system.h"
 #include "cmd_parse_2_lag.h"
 #include "cmd_parse_2_port.h"
+#include "cmd_parse_2_stp.h"
 
 #pragma codeseg BANK2
 #pragma constseg BANK2
@@ -1925,6 +1926,23 @@ void cmd_parse_show(void) {
 void cmd_parse_stp(void) {
 	if (cmd_words_len < 2)
 		return;
+	if (cmd_compare(1, "version")) {
+		cmd_parse_stp_version();
+	} else if (cmd_compare(1, "pathcost")) {
+		cmd_parse_stp_pathcost();
+	} else if (cmd_compare(1, "bpdu")) {
+		cmd_parse_stp_bpdu();
+	} else if (cmd_compare(1, "priority")) {
+		cmd_parse_stp_priority();
+	} else if (cmd_compare(1, "hello")) {
+		cmd_parse_stp_hello();
+	} else if (cmd_compare(1, "maxage")) {
+		cmd_parse_stp_maxage();
+	} else if (cmd_compare(1, "fwd")) {
+		cmd_parse_stp_fwd();
+	} else if (cmd_compare(1, "txhold")) {
+		cmd_parse_stp_txhold();
+	}
 }
 void cmd_parse_system(void) {
 	if (cmd_words_len < 2)
