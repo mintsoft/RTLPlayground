@@ -5,6 +5,7 @@
 #include "cmd_parse_2_show.h"
 #include "cmd_parse_2_remove.h"
 #include "cmd_parse_2_system.h"
+#include "cmd_parse_2_lag.h"
 
 #pragma codeseg BANK2
 #pragma constseg BANK2
@@ -1859,9 +1860,13 @@ void cmd_parse_feature(void) {
 }
 
 void cmd_parse_lag(void) {
-	if (cmd_words_len < 2)
+	if (cmd_words_len < 3)
 		return;
 
+	if (atoi_byte(cmd_words_b[1]) != 1 || atoi_results_u8 > 4 || atoi_results_u8 < 1)
+		return;
+
+	cmd_parse_lag_NUMBER();
 }
 void cmd_parse_help(void) {
 	cmd_error("Sorry, there is no help at the moment.\n");
@@ -1946,6 +1951,7 @@ void cmd_parse_system(void) {
 		cmd_parse_system_syslog();
 	}
 }
+
 void cmd_parse_vlan(void) {
 	if (cmd_words_len < 2)
 		return;
